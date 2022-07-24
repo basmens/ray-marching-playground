@@ -1,10 +1,19 @@
 package nl.basmens.raymarchingplayground;
 
 
-public class Main {
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import nl.basmens.raymarchingplayground.engine.Window;
+
+
+public class Main {
+  private static final Logger logger = LogManager.getLogger(Main.class);
 
   public static void main(String[] passedArgs) {
-    System.out.println("That'll do it");
+    logger.info("Main method");
+
+    Window window = Window.get();
+    window.run();
   }
 }
