@@ -8,7 +8,7 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 
-import nl.basmens.raymarchingplayground.engine.util.time;
+import nl.basmens.raymarchingplayground.util.time;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -36,8 +36,6 @@ public class Window {
     this.height = 1080;
 
     this.title = "Ray Marching Playground";
-
-    currentScene = new FractalScene();
   }
 
 
@@ -86,6 +84,10 @@ public class Window {
     glfwShowWindow(glfwWindow);
 
     GL.createCapabilities();
+
+    // Make scene
+    currentScene = new FractalScene();
+    currentScene.init();
   }
   
 
