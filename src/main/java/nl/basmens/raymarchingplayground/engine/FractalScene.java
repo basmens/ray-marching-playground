@@ -5,6 +5,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.BufferUtils;
 
+import nl.basmens.raymarchingplayground.renderer.Shader;
+
 import static org.lwjgl.opengl.GL30.*;
 
 import java.nio.FloatBuffer;
@@ -14,33 +16,7 @@ import java.nio.IntBuffer;
 public class FractalScene extends Scene {
   private static final Logger logger = LogManager.getLogger(FractalScene.class);
 
-
-  private String vertexShaderSource = 
-  "#version 330 core \n" +
-  "\n" +
-  "layout (location = 0) in vec3 aPos; \n" +
-  "layout (location = 1) in vec4 aColor; \n" +
-  "\n" +
-  "out vec4 fColor; \n" +
-  "\n" +
-  "void main() { \n" +
-  "  fColor = aColor; \n" +
-  "  gl_Position = vec4(aPos, 1); \n" +
-  "} \n";
-
-  private String fragmentShaderSource = 
-  "#version 330 core \n" +
-  "\n" +
-  "in vec4 fColor; \n" +
-  "\n" +
-  "out vec4 color; \n" +
-  "\n" +
-  "void main() { \n" +
-  "  color = fColor; \n" +
-  "} \n";
-
-  private int vertexShaderID, fragmentShaderID;
-  private int shaderProgram;
+  Shader defaultShader;
 
   private int vaoID, vboID, eboID;
 
@@ -61,7 +37,7 @@ public class FractalScene extends Scene {
 
 
   // =====================================================================================================
-  // Initializing
+  // Initialization
   // =====================================================================================================
   public FractalScene() {
     super();
@@ -72,47 +48,8 @@ public class FractalScene extends Scene {
   public void init() {
     logger.info("FractalScene init");
 
-    // =====================================================================================================
-    // Compile and link shader
-    // =====================================================================================================
-
-    // Vertex shader
-    vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShaderID, vertexShaderSource);
-    glCompileShader(vertexShaderID);
-
-    int succes = glGetShaderi(vertexShaderID, GL_COMPILE_STATUS);
-    if (succes == GL_FALSE) {
-      int len = glGetShaderi(vertexShaderID, GL_INFO_LOG_LENGTH);
-      logger.error("Default vertex shader failed to compile:\n\t" + glGetShaderInfoLog(vertexShaderID, len));
-      assert false : "";
-    }
-
-    // Fragment shader
-    fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShaderID, fragmentShaderSource);
-    glCompileShader(fragmentShaderID);
-
-    succes = glGetShaderi(fragmentShaderID, GL_COMPILE_STATUS);
-    if (succes == GL_FALSE) {
-      int len = glGetShaderi(fragmentShaderID, GL_INFO_LOG_LENGTH);
-      logger.error("Default fragment shader failed to compile:\n\t" + glGetShaderInfoLog(fragmentShaderID, len));
-      assert false : "";
-    }
-
-    // Link shaders
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShaderID);
-    glAttachShader(shaderProgram, fragmentShaderID);
-    glLinkProgram(shaderProgram);
-
-    succes = glGetProgrami(shaderProgram, GL_LINK_STATUS);
-    if (succes == GL_FALSE) {
-      int len = glGetProgrami(shaderProgram, GL_INFO_LOG_LENGTH);
-      logger.error("Default shader failed to link:\n\t" + glGetProgramInfoLog(shaderProgram, len));
-      assert false : "";
-    }
-
+    defaultShader = new Shader("src/main/resources/shaders/defaultShader.glsl");
+    defaultShader.compile();
 
     // =====================================================================================================
     // Generate VAO, VBO and EBO buffer objects and send them to the GPU
@@ -154,8 +91,7 @@ public class FractalScene extends Scene {
 
   @Override
   public void update(float dt) {
-    // Bind shader program
-    glUseProgram(shaderProgram);
+    defaultShader.use();
 
     // Bind VAO
     glBindVertexArray(vaoID);
@@ -170,6 +106,7 @@ public class FractalScene extends Scene {
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
     glBindVertexArray(0); 
-    glUseProgram(0);
+   
+    defaultShader.detach();
   }
 }
