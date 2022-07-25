@@ -10,7 +10,7 @@
             "request": "launch",
             "mainClass": "nl.basmens.raymarchingplayground.Main",
             "projectName": "ray-marching-playground",
-            "vmArgs": "-Dsun.stdout.encoding=UTF-8 -Dsun.err.encoding=UTF-8"
+            "vmArgs": "-Dsun.stdout.encoding=UTF-8 -Dsun.err.encoding=UTF-8 -enableassertions"
         },
         {
             "type": "java",

@@ -85,6 +85,7 @@ public class FractalScene extends Scene {
     if (succes == GL_FALSE) {
       int len = glGetShaderi(vertexShaderID, GL_INFO_LOG_LENGTH);
       logger.error("Default vertex shader failed to compile:\n\t" + glGetShaderInfoLog(vertexShaderID, len));
+      assert false : "";
     }
 
     // Fragment shader
@@ -96,6 +97,7 @@ public class FractalScene extends Scene {
     if (succes == GL_FALSE) {
       int len = glGetShaderi(fragmentShaderID, GL_INFO_LOG_LENGTH);
       logger.error("Default fragment shader failed to compile:\n\t" + glGetShaderInfoLog(fragmentShaderID, len));
+      assert false : "";
     }
 
     // Link shaders
@@ -108,6 +110,7 @@ public class FractalScene extends Scene {
     if (succes == GL_FALSE) {
       int len = glGetProgrami(shaderProgram, GL_INFO_LOG_LENGTH);
       logger.error("Default shader failed to link:\n\t" + glGetProgramInfoLog(shaderProgram, len));
+      assert false : "";
     }
 
 
