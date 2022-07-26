@@ -24,39 +24,22 @@ public class Window {
 
   private static Scene currentScene;
 
+  private long glfwMonitor;
+  private long glfwWindow;
   private int width, height;
   private String title;
-  private long glfwWindow;
 
 
+  // ==================================================================================================================================================
+  // Constructor
+  // ==================================================================================================================================================
   private Window() {
     logger.info("Window init");
-
-    this.width = 1920;
-    this.height = 1080;
-
-    this.title = "Ray Marching Playground";
-  }
-
-
-  public static Window get() {
-    if (Window.window == null) {
-      Window.window = new Window();
-    }
-    
-    return window;
-  }
-
-
-  public void run() {
     logger.info("Hello LWJGL " + Version.getVersion() + "!");
 
-    init();
-    loop();
-  }
+    this.title = "Ray Marching Playground";
 
 
-  public void init() {
     // Setup error callback
     GLFW.glfwSetErrorCallback(new ErrorCallback(logger));
 
@@ -68,15 +51,21 @@ public class Window {
 		glfwDefaultWindowHints();
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-		glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+		//glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 
     // Create window
-    glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
+    glfwMonitor = glfwGetPrimaryMonitor();
+    GLFWVidMode videoMode = glfwGetVideoMode(glfwMonitor);
+    this.width = videoMode.width();
+    this.height = videoMode.height();
+
+    glfwWindow = glfwCreateWindow(this.width, this.height, this.title, glfwGetPrimaryMonitor(), NULL);
 		if (glfwWindow == NULL)
 			throw new RuntimeException("Failed to create the GLFW window");
 
     // Make the OpenGL context current
     glfwMakeContextCurrent(glfwWindow);
+
     // Enable v-sync
     glfwSwapInterval(1);
 
@@ -89,9 +78,24 @@ public class Window {
     currentScene = new FractalScene();
     currentScene.init();
   }
+
+
+  // ==================================================================================================================================================
+  // Singleton get
+  // ==================================================================================================================================================
+  public static Window get() {
+    if (Window.window == null) {
+      Window.window = new Window();
+    }
+    
+    return window;
+  }
   
 
-  public void loop() {
+  // ==================================================================================================================================================
+  // Run
+  // ==================================================================================================================================================
+  public void run() {
     float beginTime = time.getTime();
     float endTime = time.getTime();
     float deltaTime = -1;
