@@ -14,6 +14,7 @@ public class Main {
     logger.info("Main method");
 
     Window window = Window.get();
+    window.init();
     window.run();
   }
 }

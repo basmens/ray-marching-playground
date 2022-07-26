@@ -3,37 +3,29 @@ package nl.basmens.raymarchingplayground.engine;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.BufferUtils;
+import org.joml.Vector2i;
+import org.joml.Vector3f;
 
+import nl.basmens.raymarchingplayground.renderer.FractalRenderer;
 import nl.basmens.raymarchingplayground.renderer.Shader;
+import nl.basmens.raymarchingplayground.util.Time;
 
-import static org.lwjgl.opengl.GL30.*;
-
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class FractalScene extends Scene {
   private static final Logger logger = LogManager.getLogger(FractalScene.class);
 
-  Shader defaultShader;
+  FractalRenderer renderer;
+  Shader shader;
 
-  private int vaoID, vboID, eboID;
+  private String shaderFilePath = "src/main/resources/shaders/rayMarching.glsl";
+  private String sceneFilePath = "src/main/resources/shaders/scenes/spheres.glsl";
 
 
-  private float[] vertexArray = {
-    // Position             Color
-     0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f, 1.0f,  // Bottom right  0
-    -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f, 1.0f,  // Top Left      1
-     0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f, 1.0f,  // Top right     2
-    -0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 0.0f, 1.0f   // Bottom Left   3
-  };
-
-  // Must be counter-clockwise
-  private int[] elementArray = {
-    1, 0, 2,  // Top right triangle
-    1, 3, 0   // Bottom left triangle
-  };
+  // Fill the screen
+  
 
 
   // =====================================================================================================
@@ -48,65 +40,47 @@ public class FractalScene extends Scene {
   public void init() {
     logger.info("FractalScene init");
 
-    defaultShader = new Shader("src/main/resources/shaders/defaultShader.glsl");
-    defaultShader.compile();
+    shader = new Shader(shaderFilePath);
+    String source = shader.getFragmentSource();
 
-    // =====================================================================================================
-    // Generate VAO, VBO and EBO buffer objects and send them to the GPU
-    // =====================================================================================================
-    vaoID = glGenVertexArrays();
-    glBindVertexArray(vaoID);
+    Pattern p = Pattern.compile("(<scene code here>)", Pattern.CASE_INSENSITIVE);
+    Matcher m = p.matcher(source);
+    int splitIndex = 0;
+    if(m.find()) {
+      splitIndex = source.indexOf("\n", m.end());
+    } else {
+      logger.error("No place to put the scene code. Add '<scene code here>' somewhere to insert the scene code");
+    }
 
-    // Create float buffer of vertices
-    FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(vertexArray.length);
-    vertexBuffer.put(vertexArray).flip();
+    // Pattern p = Pattern.compile("(#)([a-z]+)( )");
+    // Matcher m = p.matcher(source);
+    // int splitIndex = 0;
+    // while(m.find(splitIndex)) {
+    //   splitIndex = m.end();
+    // }
+    // splitIndex = source.indexOf("\n", splitIndex);
 
-    // Create VBO and vertex buffer
-    vboID = glGenBuffers();
-    glBindBuffer(GL_ARRAY_BUFFER, vboID);
-    glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW);
+    shader.setFragmentSource(source.substring(0, splitIndex) + Shader.readFragmentShaderFile(sceneFilePath) + "\n" + source.substring(splitIndex));
+    shader.compile();
 
-    // Create the indicis and upload
-    IntBuffer elementBuffer = BufferUtils.createIntBuffer(elementArray.length);
-    elementBuffer.put(elementArray).flip();
+    renderer = new FractalRenderer(shader);
+    renderer.generateBufferObjects();
 
-    eboID = glGenBuffers();
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementBuffer, GL_STATIC_DRAW);
+    shader.uploadVec2i("u_resolution", new Vector2i(Window.get().getWidth(), Window.get().getHeight()));
 
-    // Add vertex attribute pointers
-    int floatSizeBytes = 4;
-
-    int positionSize = 3;
-    int colorSize = 4;
-
-    int vertexSizeBytes = (positionSize + colorSize) * floatSizeBytes;
-    glVertexAttribPointer(0, positionSize, GL_FLOAT, false, vertexSizeBytes, 0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, colorSize, GL_FLOAT, false, vertexSizeBytes, positionSize * floatSizeBytes);
-    glEnableVertexAttribArray(1);
+    shader.uploadVec1f("u_cameraFOV", (float)(Math.PI / 4));
+    shader.uploadVec3f("u_cameraPos", new Vector3f(0, 1, 6.5f));
+    shader.uploadVec3f("u_cameraDir", new Vector3f(0, 0, 0));
   }
 
 
   @Override
   public void update(float dt) {
-    defaultShader.use();
+    //double angle = (Time.getTime() * 0.8) % (Math.PI * 2);
+    //shader.uploadVec3f("u_cameraPos", new Vector3f((float)(Math.sin(angle) * 6.5), 1, (float)(Math.cos(angle) * 6.5)));
+    //shader.uploadVec3f("u_cameraDir", new Vector3f(1, 0, 0));
 
-    // Bind VAO
-    glBindVertexArray(vaoID);
-
-    // Enable the vertex attribute pointers
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-
-    glDrawElements(GL_TRIANGLES, elementArray.length, GL_UNSIGNED_INT, 0);
-
-    // Unbind everything
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-    glBindVertexArray(0); 
-   
-    defaultShader.detach();
+    shader.uploadVec1f("u_time", Time.getTime());
+    renderer.render();
   }
 }

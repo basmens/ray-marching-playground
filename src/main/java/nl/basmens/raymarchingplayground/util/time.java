@@ -1,6 +1,6 @@
 package nl.basmens.raymarchingplayground.util;
 
-public class time {
+public class Time {
   public static float timeStarted = System.nanoTime();
 
   public static float getTime() {

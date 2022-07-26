@@ -8,7 +8,7 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 
-import nl.basmens.raymarchingplayground.util.time;
+import nl.basmens.raymarchingplayground.util.Time;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -18,7 +18,7 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 
 public class Window {
-  public static Window window = null;
+  private static Window window = null;
 
   private static final Logger logger = LogManager.getLogger(Window.class);
 
@@ -34,6 +34,11 @@ public class Window {
   // Constructor
   // ==================================================================================================================================================
   private Window() {
+    logger.info("Window constructor");
+  }
+
+  // Extra init function for singleton
+  public void init() {
     logger.info("Window init");
     logger.info("Hello LWJGL " + Version.getVersion() + "!");
 
@@ -59,7 +64,8 @@ public class Window {
     this.width = videoMode.width();
     this.height = videoMode.height();
 
-    glfwWindow = glfwCreateWindow(this.width, this.height, this.title, glfwGetPrimaryMonitor(), NULL);
+    glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
+    //glfwWindow = glfwCreateWindow(this.width, this.height, this.title, glfwGetPrimaryMonitor(), NULL);
 		if (glfwWindow == NULL)
 			throw new RuntimeException("Failed to create the GLFW window");
 
@@ -88,16 +94,16 @@ public class Window {
       Window.window = new Window();
     }
     
-    return window;
+    return Window.window;
   }
-  
+
 
   // ==================================================================================================================================================
   // Run
   // ==================================================================================================================================================
   public void run() {
-    float beginTime = time.getTime();
-    float endTime = time.getTime();
+    float beginTime = Time.getTime();
+    float endTime = Time.getTime();
     float deltaTime = -1;
 
     while(!glfwWindowShouldClose(glfwWindow)) {
@@ -107,21 +113,46 @@ public class Window {
       // float r = (float)Math.sin(time.getTime() + Math.PI / 3 * 0);
       // float g = (float)Math.sin(time.getTime() + Math.PI / 3 * 2);
       // float b = (float)Math.sin(time.getTime() + Math.PI / 3 * 4);
-      float r = 1.5f - Math.abs((time.getTime() + 0) % 3 - 1.5f);
-      float g = 1.5f - Math.abs((time.getTime() + 1) % 3 - 1.5f);
-      float b = 1.5f - Math.abs((time.getTime() + 2) % 3 - 1.5f);
+      float r = 1.5f - Math.abs((Time.getTime() + 0) % 3 - 1.5f);
+      float g = 1.5f - Math.abs((Time.getTime() + 1) % 3 - 1.5f);
+      float b = 1.5f - Math.abs((Time.getTime() + 2) % 3 - 1.5f);
 
       glClearColor(r, g, b, 1);
       glClear(GL_COLOR_BUFFER_BIT);
 
       if (deltaTime >= 0)
         currentScene.update(deltaTime);
-
+      
       glfwSwapBuffers(glfwWindow);
 
-      endTime = time.getTime();
+      endTime = Time.getTime();
       deltaTime = endTime - beginTime;
       beginTime = endTime;
+
+      System.out.println(1/deltaTime);
     }
+  }
+
+
+  // ==================================================================================================================================================
+  // Getters and Setters
+  // ==================================================================================================================================================
+  public int getWidth() {
+    return width;
+  }
+
+
+  public void setWidth(int width) {
+    this.width = width;
+  }
+
+
+  public int getHeight() {
+    return height;
+  }
+
+
+  public void setHeight(int height) {
+    this.height = height;
   }
 }

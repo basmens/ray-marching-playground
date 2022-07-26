@@ -3,11 +3,23 @@ package nl.basmens.raymarchingplayground.renderer;
 import static org.lwjgl.opengl.GL30.*;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector2i;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
+import org.joml.Vector4f;
+import org.joml.Vector4i;
+import org.lwjgl.BufferUtils;
 
 public class Shader {
   private static final Logger logger = LogManager.getLogger(Shader.class);
@@ -19,6 +31,8 @@ public class Shader {
   private int vertexShaderID, fragmentShaderID;
   private int shaderProgramID;
 
+  private boolean beingUsed = false;
+
 
   // ==================================================================================================================================================
   // Initialization
@@ -28,40 +42,87 @@ public class Shader {
 
     this.filePath = filePath;
 
+    vertexSource = Shader.readVertexShaderFile(filePath);
+    fragmentSource = Shader.readFragmentShaderFile(filePath);
+  }
+
+
+  // ==================================================================================================================================================
+  // Read source file
+  // ==================================================================================================================================================
+  public static String readVertexShaderFile(String filePath) {
     try {
       String source = new String(Files.readAllBytes(Paths.get(filePath)));
-      String[] splitString = source.split("(#type)( )([a-zA-Z]+)");
 
-      // Find patterns after '#type'
-      int index = source.indexOf("#type") + 6;
-      int eol = source.indexOf("\n", index);
-      String firstPattern = source.substring(index, eol).trim();
+      Pattern p = Pattern.compile("(#type)( )(vertex)", Pattern.CASE_INSENSITIVE);
+      Matcher m = p.matcher(source);
+      if (m.find()) {
+        int startIndex = source.indexOf("\n", m.start());
+        int endIndex = source.indexOf("#type", startIndex);
 
-      index = source.indexOf("#type", eol) + 6;
-      eol = source.indexOf("\n", index);
-      String secondPattern = source.substring(index, eol).trim();
+        if (endIndex == -1)
+          endIndex = source.length();
 
-      // load source
-      if(firstPattern.equals("vertex")) {
-        vertexSource = splitString[1];
-      } else if(firstPattern.equals("fragment")) {
-        fragmentSource = splitString[1];
+        return source.substring(startIndex, endIndex);
       } else {
-        throw new IOException("Unexpected token '" + firstPattern + "'");
-      }
-
-      if(secondPattern.equals("vertex")) {
-        vertexSource = splitString[2];
-      } else if(secondPattern.equals("fragment")) {
-        fragmentSource = splitString[2];
-      } else {
-        throw new IOException("Unexpected token '" + secondPattern + "'");
+        throw new IOException("The given file must contain a vertex shader");
       }
 
     } catch(IOException e) {
       logger.error("Failed to load file '" + filePath + "'", e);
       assert false : "";
+      return null;
     }
+  }
+
+  public static String readFragmentShaderFile(String filePath) {
+    try {
+      String source = new String(Files.readAllBytes(Paths.get(filePath)));
+
+      Pattern p = Pattern.compile("(#type)( )(fragment)", Pattern.CASE_INSENSITIVE);
+      Matcher m = p.matcher(source);
+      if (m.find()) {
+        int startIndex = source.indexOf("\n", m.start());
+        if (startIndex == -1)
+          startIndex = source.length();
+
+        int endIndex = source.indexOf("#type", startIndex);
+        if (endIndex == -1)
+          endIndex = source.length();
+
+        return source.substring(startIndex, endIndex);
+      } else {
+        throw new IOException("The given file must contain a fragment shader");
+      }
+
+    } catch(IOException e) {
+      logger.error("Failed to load file '" + filePath + "'", e);
+      assert false : "";
+      return null;
+    }
+  }
+
+
+  // ==================================================================================================================================================
+  // Getters and Setters
+  // ==================================================================================================================================================
+  public String getVertexSource() {
+    return vertexSource;
+  }
+
+
+  public void setVertexSource(String vertexSource) {
+    this.vertexSource = vertexSource;
+  }
+
+
+  public String getFragmentSource() {
+    return fragmentSource;
+  }
+
+
+  public void setFragmentSource(String fragmentSource) {
+    this.fragmentSource = fragmentSource;
   }
 
 
@@ -112,7 +173,10 @@ public class Shader {
   // Use shader
   // ==================================================================================================================================================
   public void use() {
-    glUseProgram(shaderProgramID);
+    if (!beingUsed) {
+      glUseProgram(shaderProgramID);
+      beingUsed = true;
+    }
   }
 
 
@@ -120,6 +184,115 @@ public class Shader {
   // Detach shader
   // ==================================================================================================================================================
   public void detach() {
-    glUseProgram(0);
+    if (beingUsed) {
+      glUseProgram(0);
+      beingUsed = false;
+    }
+  }
+
+
+  // ==================================================================================================================================================
+  // Upload uniforms matrices
+  // ==================================================================================================================================================
+  public void uploadMat4f(String varName, Matrix4f mat4) {
+    int varLocation = glGetUniformLocation(shaderProgramID, varName);
+    use();
+    FloatBuffer matBuffer = BufferUtils.createFloatBuffer(16);
+    mat4.get(matBuffer);
+    glUniformMatrix4fv(varLocation, false, matBuffer);
+  }
+
+  public void uploadMat3f(String varName, Matrix3f mat3) {
+      int varLocation = glGetUniformLocation(shaderProgramID, varName);
+      use();
+      FloatBuffer matBuffer = BufferUtils.createFloatBuffer(9);
+      mat3.get(matBuffer);
+      glUniformMatrix3fv(varLocation, false, matBuffer);
+  }
+
+
+  // ==================================================================================================================================================
+  // Upload uniforms floats
+  // ==================================================================================================================================================
+  public void uploadVec4f(String varName, Vector4f vec) {
+      int varLocation = glGetUniformLocation(shaderProgramID, varName);
+      use();
+      glUniform4f(varLocation, vec.x, vec.y, vec.z, vec.w);
+  }
+  // public void uploadVec4f(String varName, float x, float y, float z, float w) {
+  //   int varLocation = glGetUniformLocation(shaderProgramID, varName);
+  //   use();
+  //   glUniform4f(varLocation, x, y, z, w);
+  // }
+
+  public void uploadVec3f(String varName, Vector3f vec) {
+      int varLocation = glGetUniformLocation(shaderProgramID, varName);
+      use();
+      glUniform3f(varLocation, vec.x, vec.y, vec.z);
+  }
+  // public void uploadVec3f(String varName, float x, float y, float z) {
+  //   int varLocation = glGetUniformLocation(shaderProgramID, varName);
+  //   use();
+  //   glUniform3f(varLocation, x, y, z);
+  // }
+
+  public void uploadVec2f(String varName, Vector2f vec) {
+      int varLocation = glGetUniformLocation(shaderProgramID, varName);
+      use();
+      glUniform2f(varLocation, vec.x, vec.y);
+  }
+  // public void uploadVec2f(String varName, float x, float y) {
+  //   int varLocation = glGetUniformLocation(shaderProgramID, varName);
+  //   use();
+  //   glUniform2f(varLocation, x, y);
+  // }
+
+  public void uploadVec1f(String varName, float val) {
+      int varLocation = glGetUniformLocation(shaderProgramID, varName);
+      use();
+      glUniform1f(varLocation, val);
+  }
+
+
+  // ==================================================================================================================================================
+  // Upload uniforms ints
+  // ==================================================================================================================================================
+  public void uploadVec4i(String varName, Vector4i vec) {
+    int varLocation = glGetUniformLocation(shaderProgramID, varName);
+    use();
+    glUniform4i(varLocation, vec.x, vec.y, vec.z, vec.w);
+  }
+  // public void uploadVec4i(String varName, int x, int y, int z, int w) {
+  //   int varLocation = glGetUniformLocation(shaderProgramID, varName);
+  //   use();
+  //   glUniform4i(varLocation, x, y, z, w);
+  // }
+
+  public void uploadVec3i(String varName, Vector3i vec) {
+    int varLocation = glGetUniformLocation(shaderProgramID, varName);
+    use();
+    glUniform3i(varLocation, vec.x, vec.y, vec.z);
+  }
+  // public void uploadVec3i(String varName, int x, int y, int z) {
+  //   int varLocation = glGetUniformLocation(shaderProgramID, varName);
+  //   use();
+  //   glUniform3i(varLocation, x, y, z);
+  // }
+
+  public void uploadVec2i(String varName, Vector2i vec) {
+    int varLocation = glGetUniformLocation(shaderProgramID, varName);
+    use();
+    glUniform2i(varLocation, vec.x, vec.y);
+  }
+  // public void uploadVec2i(String varName, int x, int y) {
+  //   int varLocation = glGetUniformLocation(shaderProgramID, varName);
+  //   use();
+  //   glUniform2i(varLocation, x, y);
+  // }
+  
+  public void uploadVec1i(String varName, int val) {
+      int varLocation = glGetUniformLocation(shaderProgramID, varName);
+      use();
+      glUniform1i(varLocation, val);
   }
 }
