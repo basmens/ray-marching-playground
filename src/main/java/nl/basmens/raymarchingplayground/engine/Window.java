@@ -29,6 +29,8 @@ public class Window {
   private int width, height;
   private String title;
 
+  private int frameCount = -1;
+
 
   // ==================================================================================================================================================
   // Constructor
@@ -106,6 +108,11 @@ public class Window {
     double endTime;
     double deltaTime = -1;
 
+    frameCount = 0;
+
+    double lastFPScheck = beginTime;
+    int framesPerFPScheck = 50;
+
     while(!glfwWindowShouldClose(glfwWindow)) {
       // Poll events
       glfwPollEvents();
@@ -128,8 +135,12 @@ public class Window {
       endTime = Time.getTime();
       deltaTime = endTime - beginTime;
       beginTime = endTime;
+      frameCount++;
 
-      System.out.println(1/deltaTime);
+      if (frameCount % framesPerFPScheck == 0) {
+        System.out.println("FPS over " + framesPerFPScheck + " frames: " + framesPerFPScheck/(endTime - lastFPScheck));
+        lastFPScheck = endTime;
+      }
     }
   }
 
@@ -137,6 +148,13 @@ public class Window {
   // ==================================================================================================================================================
   // Getters and Setters
   // ==================================================================================================================================================
+
+  // Get only
+  public int getFrameCount() {
+    return frameCount;
+  }
+
+
   public int getWidth() {
     return width;
   }
