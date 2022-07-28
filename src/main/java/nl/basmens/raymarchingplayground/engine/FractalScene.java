@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
+import nl.basmens.raymarchingplayground.renderer.Camera;
 import nl.basmens.raymarchingplayground.renderer.FractalRenderer;
 import nl.basmens.raymarchingplayground.renderer.Shader;
 import nl.basmens.raymarchingplayground.util.Time;
@@ -19,6 +20,7 @@ public class FractalScene extends Scene {
 
   FractalRenderer renderer;
   Shader shader;
+  Camera camera;
 
   private String shaderFilePath = "src/main/resources/shaders/rayMarching.glsl";
   private String sceneFilePath = "src/main/resources/shaders/scenes/spheres.glsl";
@@ -60,25 +62,28 @@ public class FractalScene extends Scene {
     // }
     // splitIndex = source.indexOf("\n", splitIndex);
 
+    // Generate shader and renderer
     shader.setFragmentSource(source.substring(0, splitIndex) + Shader.readFragmentShaderFile(sceneFilePath) + "\n" + source.substring(splitIndex));
     shader.compile();
 
     renderer = new FractalRenderer(shader);
     renderer.generateBufferObjects();
 
-    shader.uploadVec2i("u_resolution", new Vector2i(Window.get().getWidth(), Window.get().getHeight()));
+    // Generate camera
+    camera = new Camera(new Vector3f(0, 1, 6.5f), new Vector3f(0, 0, 0), (float)(Math.PI / 4));
 
-    shader.uploadVec1f("u_cameraFOV", (float)(Math.PI / 4));
-    shader.uploadVec3f("u_cameraPos", new Vector3f(0, 1, 6.5f));
-    shader.uploadVec3f("u_cameraDir", new Vector3f(0, 0, 0));
+    // Upload uniforms
+    camera.uploadDataToShader(shader);
+    shader.uploadVec2i("u_resolution", new Vector2i(Window.get().getWidth(), Window.get().getHeight()));
   }
 
 
   @Override
   public void update(double dt) {
-    //double angle = (Time.getTime() * 0.8) % (Math.PI * 2);
-    //shader.uploadVec3f("u_cameraPos", new Vector3f((float)(Math.sin(angle) * 6.5), 1, (float)(Math.cos(angle) * 6.5)));
-    //shader.uploadVec3f("u_cameraDir", new Vector3f(1, 0, 0));
+    double angle = (Time.getTime() * 0.8) % (Math.PI * 2);
+    camera.setPosition(new Vector3f((float)(Math.sin(angle) * 6.5), 1, (float)(Math.cos(angle) * 6.5)));
+    camera.setDirection(new Vector3f(0, (float)angle, 0));
+    camera.uploadDataToShader(shader);
 
     shader.uploadVec1f("u_time", (float)Time.getTime());
     renderer.render();

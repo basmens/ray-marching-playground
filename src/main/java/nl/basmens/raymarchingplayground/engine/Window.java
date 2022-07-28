@@ -66,6 +66,9 @@ public class Window {
     this.width = videoMode.width();
     this.height = videoMode.height();
 
+    this.width = 1920;
+    this.height = 1080;
+
     glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
     //glfwWindow = glfwCreateWindow(this.width, this.height, this.title, glfwGetPrimaryMonitor(), NULL);
 		if (glfwWindow == NULL)
