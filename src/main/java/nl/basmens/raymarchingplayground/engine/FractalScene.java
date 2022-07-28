@@ -28,9 +28,9 @@ public class FractalScene extends Scene {
   
 
 
-  // =====================================================================================================
+  // ==================================================================================================================================================
   // Initialization
-  // =====================================================================================================
+  // ==================================================================================================================================================
   public FractalScene() {
     super();
   }
@@ -75,12 +75,12 @@ public class FractalScene extends Scene {
 
 
   @Override
-  public void update(float dt) {
+  public void update(double dt) {
     //double angle = (Time.getTime() * 0.8) % (Math.PI * 2);
     //shader.uploadVec3f("u_cameraPos", new Vector3f((float)(Math.sin(angle) * 6.5), 1, (float)(Math.cos(angle) * 6.5)));
     //shader.uploadVec3f("u_cameraDir", new Vector3f(1, 0, 0));
 
-    shader.uploadVec1f("u_time", Time.getTime());
+    shader.uploadVec1f("u_time", (float)Time.getTime());
     renderer.render();
   }
 }

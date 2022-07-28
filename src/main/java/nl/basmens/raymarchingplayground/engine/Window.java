@@ -102,9 +102,9 @@ public class Window {
   // Run
   // ==================================================================================================================================================
   public void run() {
-    float beginTime = Time.getTime();
-    float endTime = Time.getTime();
-    float deltaTime = -1;
+    double beginTime = Time.getTime();
+    double endTime;
+    double deltaTime = -1;
 
     while(!glfwWindowShouldClose(glfwWindow)) {
       // Poll events
@@ -113,9 +113,9 @@ public class Window {
       // float r = (float)Math.sin(time.getTime() + Math.PI / 3 * 0);
       // float g = (float)Math.sin(time.getTime() + Math.PI / 3 * 2);
       // float b = (float)Math.sin(time.getTime() + Math.PI / 3 * 4);
-      float r = 1.5f - Math.abs((Time.getTime() + 0) % 3 - 1.5f);
-      float g = 1.5f - Math.abs((Time.getTime() + 1) % 3 - 1.5f);
-      float b = 1.5f - Math.abs((Time.getTime() + 2) % 3 - 1.5f);
+      float r = 1.5f - (float)Math.abs((Time.getTime() + 0) % 3 - 1.5);
+      float g = 1.5f - (float)Math.abs((Time.getTime() + 1) % 3 - 1.5);
+      float b = 1.5f - (float)Math.abs((Time.getTime() + 2) % 3 - 1.5);
 
       glClearColor(r, g, b, 1);
       glClear(GL_COLOR_BUFFER_BIT);
