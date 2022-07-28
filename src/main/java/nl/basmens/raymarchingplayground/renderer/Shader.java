@@ -31,7 +31,7 @@ public class Shader {
   private int vertexShaderID, fragmentShaderID;
   private int shaderProgramID;
 
-  private boolean beingUsed = false;
+  private static int programInUse = 0;
 
 
   // ==================================================================================================================================================
@@ -173,9 +173,9 @@ public class Shader {
   // Use shader
   // ==================================================================================================================================================
   public void use() {
-    if (!beingUsed) {
+    if (programInUse != shaderProgramID) {
       glUseProgram(shaderProgramID);
-      beingUsed = true;
+      programInUse = shaderProgramID;
     }
   }
 
@@ -184,9 +184,9 @@ public class Shader {
   // Detach shader
   // ==================================================================================================================================================
   public void detach() {
-    if (beingUsed) {
+    if (programInUse == shaderProgramID) {
       glUseProgram(0);
-      beingUsed = false;
+      programInUse = 0;
     }
   }
 
