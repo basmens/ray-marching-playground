@@ -12,7 +12,7 @@ void main() {
 #type fragment
 #version 330 core
 
-// 
+// General uniforms
 uniform ivec2 u_resolution;
 uniform float u_time;
 
@@ -50,7 +50,7 @@ Shape shapes[3] = Shape[3](
 );
 
 const float minDistToSurface = 0.01;
-const float maxDistToScene = 1000.;
+const float maxDistToScene = 1000;
 const int maxSteps = 10000;
 const float elipson = 1e-5;
 

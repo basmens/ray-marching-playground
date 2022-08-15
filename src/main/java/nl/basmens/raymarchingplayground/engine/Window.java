@@ -114,7 +114,7 @@ public class Window {
     frameCount = 0;
 
     double lastFPScheck = beginTime;
-    int framesPerFPScheck = 50;
+    int framesPerFPScheck = 1;
 
     while(!glfwWindowShouldClose(glfwWindow)) {
       // Poll events

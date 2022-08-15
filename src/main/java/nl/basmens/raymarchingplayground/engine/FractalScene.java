@@ -22,8 +22,15 @@ public class FractalScene extends Scene {
   Shader shader;
   Camera camera;
 
-  private String shaderFilePath = "src/main/resources/shaders/rayMarching.glsl";
-  private String sceneFilePath = "src/main/resources/shaders/scenes/spheres.glsl";
+   private String shaderFilePath = "src/main/resources/shaders/ray_marching.glsl";
+   //private String sceneFilePath = "src/main/resources/shaders/scenes/spheres.glsl";
+   private String sceneFilePath = "src/main/resources/shaders/scenes/menger_sponge.glsl";
+
+  // private String shaderFilePath = "src/main/resources/shaders/ray_marching_old.glsl";
+  // private String sceneFilePath = "src/main/resources/shaders/scenes/ray_marching_old.glsl";
+
+  // private String shaderFilePath = "src/main/resources/shaders/shadertoy_wrapper.glsl";
+  // private String sceneFilePath = "src/main/resources/shaders/scenes/shadertoy_scene.glsl";
 
 
   // Fill the screen
@@ -80,8 +87,11 @@ public class FractalScene extends Scene {
 
   @Override
   public void update(double dt) {
+    double cameraDist = 4;
+
     double angle = (Time.getTime() * 0.8) % (Math.PI * 2);
-    camera.setPosition(new Vector3f((float)(Math.sin(angle) * 6.5), 1, (float)(Math.cos(angle) * 6.5)));
+    //double angle = -1.5f;
+    camera.setPosition(new Vector3f((float)(Math.sin(angle) * cameraDist), 1, (float)(Math.cos(angle) * cameraDist)));
     camera.setDirection(new Vector3f(0, (float)angle, 0));
     camera.uploadDataToShader(shader);
 
