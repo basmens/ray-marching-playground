@@ -87,15 +87,16 @@ public class FractalScene extends Scene {
 
   @Override
   public void update(double dt) {
-    double cameraDist = 4;
+    double t = Math.pow(Time.getTime() * 20 + 4, 0.6) - 2;
+    double cameraDist = 30 / (t * 0.1 + 2) + 5;
 
-    double angle = (Time.getTime() * 0.8) % (Math.PI * 2);
-    //double angle = -1.5f;
-    camera.setPosition(new Vector3f((float)(Math.sin(angle) * cameraDist), 1, (float)(Math.cos(angle) * cameraDist)));
-    camera.setDirection(new Vector3f(0, (float)angle, 0));
+    double angle = t * 0.05 - 0.5;
+    //double angle = -0f;
+    camera.setPosition(new Vector3f((float)(Math.sin(angle) * cameraDist), (float)(Math.sin(angle * 0.4) * 4), (float)(Math.cos(angle) * cameraDist)));
+    camera.setDirection(new Vector3f((float)(Math.sin(angle * 0.4) * 0.4), (float)(angle - Math.PI / 4), (float)(angle * 0.03)));
     camera.uploadDataToShader(shader);
 
-    shader.uploadVec1f("u_time", (float)Time.getTime());
+    shader.uploadVec1f("u_time", (float)t);
     renderer.render();
   }
 }
