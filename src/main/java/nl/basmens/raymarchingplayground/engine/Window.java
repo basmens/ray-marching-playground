@@ -8,6 +8,8 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 
+import nl.basmens.raymarchingplayground.engine.eventListeners.KeyEventListener;
+import nl.basmens.raymarchingplayground.engine.eventListeners.MouseEventListener;
 import nl.basmens.raymarchingplayground.util.Time;
 
 import static org.lwjgl.glfw.Callbacks.*;
@@ -51,8 +53,9 @@ public class Window {
     GLFW.glfwSetErrorCallback(new ErrorCallback(logger));
 
     // Initialize GLFW
-    if (!glfwInit())
+    if (!glfwInit()) {
 			throw new IllegalStateException("Unable to initialize GLFW");
+    }
 
 		// Configure GLFW
 		glfwDefaultWindowHints();
@@ -67,12 +70,18 @@ public class Window {
     this.height = videoMode.height();
 
     this.width = 1920;
-    this.height = 1080;
+   this.height = 1080;
 
     glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
     //glfwWindow = glfwCreateWindow(this.width, this.height, this.title, glfwGetPrimaryMonitor(), NULL);
 		if (glfwWindow == NULL)
 			throw new RuntimeException("Failed to create the GLFW window");
+
+    // Add event listeners
+    glfwSetCursorPosCallback(glfwWindow, MouseEventListener::mousePosCallBack);
+    glfwSetMouseButtonCallback(glfwWindow, MouseEventListener::mouseButtonCallback);
+    glfwSetScrollCallback(glfwWindow, MouseEventListener::mouseScrollCallback);
+    glfwSetKeyCallback(glfwWindow, KeyEventListener::keyCallBack);
 
     // Make the OpenGL context current
     glfwMakeContextCurrent(glfwWindow);
@@ -104,9 +113,9 @@ public class Window {
 
 
   // ==================================================================================================================================================
-  // Run
+  // Loop
   // ==================================================================================================================================================
-  public void run() {
+  private void loop() {
     double beginTime = Time.getTime();
     double endTime;
     double deltaTime = -1;
@@ -145,6 +154,27 @@ public class Window {
         lastFPScheck = endTime;
       }
     }
+  }
+
+
+  // ==================================================================================================================================================
+  // Terminate
+  // ==================================================================================================================================================
+  private void terminate() {
+    glfwFreeCallbacks(glfwWindow);
+    glfwDestroyWindow(glfwWindow);
+
+    glfwTerminate();
+    glfwSetErrorCallback(null).free();
+  }
+
+
+  // ==================================================================================================================================================
+  // Run
+  // ==================================================================================================================================================
+  public void run() {
+    loop();
+    terminate();
   }
 
 

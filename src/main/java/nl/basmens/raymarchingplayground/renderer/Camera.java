@@ -19,6 +19,13 @@ public class Camera {
   private static final Vector3f axisZ = new Vector3f(0, 0, 1);
 
 
+  // ==================================================================================================================================================
+  // Constructors
+  // ==================================================================================================================================================
+  public Camera(float fov) {
+    this(new Vector3f(0), new Vector3f(0), fov);
+  }
+
   public Camera(Vector3f position, Vector3f direction, float fov) {
     this.position = position;
     this.direction = direction;
