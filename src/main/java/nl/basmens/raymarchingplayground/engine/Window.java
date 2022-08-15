@@ -18,6 +18,8 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
+import java.nio.DoubleBuffer;
+
 
 public class Window {
   private static Window window = null;
@@ -62,6 +64,7 @@ public class Window {
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 		//glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+    //glfwWindowHint(GLFW_SAMPLES, 8);  // Enable anti-aliasing
 
     // Create window
     glfwMonitor = glfwGetPrimaryMonitor();
@@ -70,7 +73,7 @@ public class Window {
     this.height = videoMode.height();
 
     this.width = 1920;
-   this.height = 1080;
+    this.height = 1080;
 
     glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
     //glfwWindow = glfwCreateWindow(this.width, this.height, this.title, glfwGetPrimaryMonitor(), NULL);
@@ -82,6 +85,9 @@ public class Window {
     glfwSetMouseButtonCallback(glfwWindow, MouseEventListener::mouseButtonCallback);
     glfwSetScrollCallback(glfwWindow, MouseEventListener::mouseScrollCallback);
     glfwSetKeyCallback(glfwWindow, KeyEventListener::keyCallBack);
+
+    // Set input Mode
+    glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Make the OpenGL context current
     glfwMakeContextCurrent(glfwWindow);
@@ -153,6 +159,8 @@ public class Window {
         System.out.println("FPS over " + framesPerFPScheck + " frames: " + framesPerFPScheck/(endTime - lastFPScheck));
         lastFPScheck = endTime;
       }
+
+      MouseEventListener.endFrame();
     }
   }
 

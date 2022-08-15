@@ -7,6 +7,7 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 import nl.basmens.raymarchingplayground.engine.eventListeners.KeyEventListener;
+import nl.basmens.raymarchingplayground.engine.eventListeners.MouseEventListener;
 import nl.basmens.raymarchingplayground.renderer.Camera;
 import nl.basmens.raymarchingplayground.renderer.FractalRenderer;
 import nl.basmens.raymarchingplayground.renderer.Shader;
@@ -32,6 +33,7 @@ public class FractalScene extends Scene {
   private double cameraPosX, cameraPosY, cameraPosZ;
   private double cameraDirX, cameraDirY, cameraDirZ;
   private double cameraSpeed = 3;
+  private double cameraSensitivity = 0.002;
 
   private String shaderFilePath = "src/main/resources/shaders/ray_marching.glsl";
   //private String sceneFilePath = "src/main/resources/shaders/scenes/spheres.glsl";
@@ -118,7 +120,7 @@ public class FractalScene extends Scene {
     // camera.setPosition(new Vector3f((float)(Math.sin(angle) * cameraDist), (float)(Math.sin(angle * 0.4) * 4), (float)(Math.cos(angle) * cameraDist)));
     // camera.setDirection(new Vector3f((float)(Math.sin(angle * 0.4) * 0.4), (float)(angle - Math.PI / 4), (float)(angle * 0.03)));
     // camera.uploadDataToShader(shader);
-
+    
     updateMovement(dt);
 
     shader.uploadVec1f("u_time", (float)t);
@@ -127,21 +129,24 @@ public class FractalScene extends Scene {
 
 
   private void updateMovement(double dt) {
+    cameraDirY -= MouseEventListener.getDx() * cameraSensitivity;
+    cameraDirX -= MouseEventListener.getDy() * cameraSensitivity;
+
     if (KeyEventListener.isKeyPressed(GLFW_KEY_W)) {
-      cameraPosX -= Math.sin(cameraDirX) * cameraSpeed * dt;
-      cameraPosZ -= Math.cos(cameraDirX) * cameraSpeed * dt;
+      cameraPosX -= Math.sin(cameraDirY) * cameraSpeed * dt;
+      cameraPosZ -= Math.cos(cameraDirY) * cameraSpeed * dt;
     }
     if (KeyEventListener.isKeyPressed(GLFW_KEY_S)) {
-      cameraPosX += Math.sin(cameraDirX) * cameraSpeed * dt;
-      cameraPosZ += Math.cos(cameraDirX) * cameraSpeed * dt;
+      cameraPosX += Math.sin(cameraDirY) * cameraSpeed * dt;
+      cameraPosZ += Math.cos(cameraDirY) * cameraSpeed * dt;
     }
     if (KeyEventListener.isKeyPressed(GLFW_KEY_A)) {
-      cameraPosX -= Math.cos(cameraDirX) * cameraSpeed * dt;
-      cameraPosZ -= Math.sin(cameraDirX) * cameraSpeed * dt;
+      cameraPosX -= Math.cos(cameraDirY) * cameraSpeed * dt;
+      cameraPosZ += Math.sin(cameraDirY) * cameraSpeed * dt;
     }
     if (KeyEventListener.isKeyPressed(GLFW_KEY_D)) {
-      cameraPosX += Math.cos(cameraDirX) * cameraSpeed * dt;
-      cameraPosZ += Math.sin(cameraDirX) * cameraSpeed * dt;
+      cameraPosX += Math.cos(cameraDirY) * cameraSpeed * dt;
+      cameraPosZ -= Math.sin(cameraDirY) * cameraSpeed * dt;
     }
     if (KeyEventListener.isKeyPressed(GLFW_KEY_SPACE)) {
       cameraPosY += cameraSpeed * dt;
@@ -149,6 +154,7 @@ public class FractalScene extends Scene {
     if (KeyEventListener.isKeyPressed(GLFW_KEY_V)) {
       cameraPosY -= cameraSpeed * dt;
     }
+
     setCamera();
   }
 

@@ -13,6 +13,8 @@ public class MouseEventListener {
   private boolean isDragging;
   private boolean[] buttonsPressed = new boolean[3];
 
+  private boolean hasInitialMousePos = false;
+
 
   // ==================================================================================================================================================
   // Constructor
@@ -47,6 +49,12 @@ public class MouseEventListener {
     get().prevY = get().posY;
     get().posX = posX;
     get().posY = posY;
+
+    if (!get().hasInitialMousePos) {
+      get().prevX = get().posX;
+      get().prevY = get().posY;
+      get().hasInitialMousePos = true;
+    }
 
     get().isDragging = get().buttonsPressed[0] || get().buttonsPressed[1] || get().buttonsPressed[2];
   }
