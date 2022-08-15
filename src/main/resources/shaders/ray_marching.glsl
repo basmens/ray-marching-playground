@@ -47,11 +47,13 @@ struct RayHit {
   Material material;
 
   float distanceTraveled;
+  int stepsTaken;
+  float finalDistance;
 
   bool hitSky;
 };
 RayHit createRayHit() {
-  return RayHit(vec3(0), vec3(0, 1, 0), vec3(0, 1, 0), createMaterial(), 0, true);
+  return RayHit(vec3(0), vec3(0, 1, 0), vec3(0, 1, 0), createMaterial(), 0, 0, 0, true);
 }
 
 
@@ -80,11 +82,13 @@ const float maxSteps = 1000;
 const float shadow_bias = 1e-4;
 
 const bool useReflections = false;
-const bool useLighting = false;
-const bool useAmbientLight = false;
+const bool useLighting = true;
+const bool useAmbientLight = true;
 const bool useLightSources = false;
+const bool useDarkenEffect = true;
 const bool useFog = false;
 
+const float darkenEffect = 0.96;
 const float fogFactor = 0.94;
 const float maxFog = 0.6;
 
@@ -94,7 +98,7 @@ const vec3 fogColor = vec3(0, 0.5, 1);
 // Constants
 const float PI = 3.141592653589793;
 const float TAU = 6.283185307179586;
-const float ELIPSON = 1e-4;
+const float ELIPSON = 1e-5;
 
 
 // Output
@@ -119,17 +123,19 @@ RayHit ray(vec3 position, vec3 direction) {
   for (int i = 0; i < maxSteps && distanceToScene > ELIPSON; i++) {
     distanceToScene = getDistanceToScene(position, normal, hitMaterial);
     position += direction * distanceToScene;
-    hit.distanceTraveled += distanceToScene;
 
-    hitMaterial.color *= pow(0.96, i);
+    hit.distanceTraveled += distanceToScene;
+    hit.stepsTaken = i;
   }
 
   hit.position = position;
   hit.normal = normal;
   hit.direction = direction;
   hit.material = hitMaterial;
+  hit.finalDistance = distanceToScene;
+  hit.hitSky = false;
 
-  if(distanceToScene > ELIPSON) {
+  if (distanceToScene > ELIPSON) {
     getSkyHit(hit);
   }
 
@@ -146,7 +152,7 @@ vec3 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
   vec3 color = hit.material.color;
 
   // Reflection
-  if(useReflections) {
+  if (useReflections) {
     float reflectiveness = hit.material.reflectiveness;
 
     vec3 reflectionColor = vec3(0);
@@ -156,17 +162,17 @@ vec3 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
 
 
   // Lighting
-  if(useLighting) {
+  if (useLighting && !hit.hitSky) {
     vec3 lightColor = vec3(0);
 
     // Ambient light
-    if(useAmbientLight) {
+    if (useAmbientLight) {
       lightColor += ambientLightColor;
     }
 
     // Light sources
-    if(useLightSources) {
-      for(int i = 0; i < lights.length; i++) {
+    if (useLightSources) {
+      for (int i = 0; i < lights.length; i++) {
         Light light = lights[i];
 
         vec3 target = light.position;
@@ -182,7 +188,7 @@ vec3 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
 
           vec3 diffuseColor = hit.material.albedo / PI * lights[i].intensity * lights[i].color * angleWithSurface;
 
-          if(light.isDistantLight) {
+          if (light.isDistantLight) {
             lightColor += diffuseColor;
           } else {
             lightColor += diffuseColor / (4 * PI * distanceToLight * distanceToLight);
@@ -191,13 +197,19 @@ vec3 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
       }
     }
     //lightColor = vec3(abs(dot(-hit.direction, hit.normal)));
+
+    if (useDarkenEffect) {
+      float interpolate = (hit.finalDistance / ELIPSON - 1) / dot(-hit.direction, hit.normal) + 1;
+      interpolate = sqrt(clamp(interpolate, 0, 1));
+      lightColor *= pow(darkenEffect, hit.stepsTaken + interpolate);
+    }
     
     color *= lightColor;
   }
 
 
   // Fog
-  if(useFog) {
+  if (useFog) {
     float fog = 1 - pow(fogFactor, hit.distanceTraveled);
     fog = min(fog, maxFog);
 
