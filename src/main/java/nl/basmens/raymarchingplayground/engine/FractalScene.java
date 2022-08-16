@@ -32,7 +32,7 @@ public class FractalScene extends Scene {
 
   private double cameraPosX, cameraPosY, cameraPosZ;
   private double cameraDirX, cameraDirY, cameraDirZ;
-  private double cameraSpeed = 3;
+  private double cameraSpeed = 10;
   private double cameraSensitivity = 0.002;
 
   private String shaderFilePath = "src/main/resources/shaders/ray_marching.glsl";
@@ -93,7 +93,7 @@ public class FractalScene extends Scene {
     camera = new Camera((float)(Math.PI / 4));
 
     cameraPosX = 0;
-    cameraPosY = 1;
+    cameraPosY = 0;
     cameraPosZ = 35;
 
     cameraDirX = 0;
@@ -129,6 +129,8 @@ public class FractalScene extends Scene {
 
 
   private void updateMovement(double dt) {
+    cameraSpeed *= Math.pow(1.2, MouseEventListener.getScrollY());
+
     cameraDirY -= MouseEventListener.getDx() * cameraSensitivity;
     cameraDirX -= MouseEventListener.getDy() * cameraSensitivity;
 

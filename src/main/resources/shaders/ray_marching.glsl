@@ -67,24 +67,25 @@ struct Light {
   bool isDistantLight;
   bool hasShadows;
 };
-const Light lights[6] = Light[6](
-  Light(vec3(0, 1, 0), 1, vec3(1, 1, 1), 3, true, false),
-//  Light(vec3(3, 1, 0), 1, vec3(1, 0, 0), 200, false)
-  Light(vec3(0, -1, 0), 1, vec3(1, 1, 1), 1, true, false),
-  Light(vec3(1, 0, 0), 1, vec3(1, 1, 1), 1, true, false),
-  Light(vec3(-1, 0, 0), 1, vec3(1, 1, 1), 1, true, false),
-  Light(vec3(0, 0, 1), 1, vec3(1, 1, 1), 1, true, false),
-  Light(vec3(0, 0, -1), 1, vec3(1, 1, 1), 1, true, false)
+const Light lights[1] = Light[1](
+  // Light(vec3(0, 1, 0), 1, vec3(1, 1, 1), 3, true, false),
+  // Light(vec3(0, -1, 0), 1, vec3(1, 1, 1), 1, true, false),
+  // Light(vec3(1, 0, 0), 1, vec3(1, 1, 1), 1, true, false),
+  // Light(vec3(-1, 0, 0), 1, vec3(1, 1, 1), 1, true, false),
+  // Light(vec3(0, 0, 1), 1, vec3(1, 1, 1), 1, true, false),
+  // Light(vec3(0, 0, -1), 1, vec3(1, 1, 1), 1, true, false)
+  Light(vec3(0, 0, 0), 1, vec3(1, 1, 1), 10000, false, false)
 );
 
+
 // Settings
-const float maxSteps = 1000;
+const float maxSteps = 1200;
 const float shadow_bias = 1e-4;
 
 const bool useReflections = false;
 const bool useLighting = true;
-const bool useAmbientLight = true;
-const bool useLightSources = false;
+const bool useAmbientLight = false;
+const bool useLightSources = true;
 const bool useDarkenEffect = true;
 const bool useFog = false;
 
