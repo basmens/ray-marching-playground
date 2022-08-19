@@ -30,7 +30,7 @@ vec3 applyScale(vec3 point, vec3 pos, vec3 scale) {
 
 
 // https://iquilezles.org/articles/distfunctions/
-float getDistanceToScene(in vec3 rayPos, out vec3 normal, out Material materialHit) {
+float getDistanceToScene(in vec3 rayPos, out vec3 normal, out vec3 albedo) {
   float scale = 0.1;
   rayPos += vec3(0, 0, 0);
   rayPos *= scale;
@@ -73,19 +73,20 @@ float getDistanceToScene(in vec3 rayPos, out vec3 normal, out Material materialH
   }
   normal *= normalTransform;
 
-  // Return material
-  materialHit = createMaterial();
-  //materialHit.color = normal;
-  //materialHit.color = normalize(abs(point));
-  materialHit.color = abs(rayPos);
+  // Return color
+  //albedo = normal;
+  //albedo = normalize(abs(point));
+  albedo = abs(rayPos);
 
   return distance;
 }
 
 
-void getSkyHit(inout RayHit hit) {
-  Material material = createMaterial();
-  material.color = vec3(0, 0.3, 0.8);
-  hit.material = material;
-  hit.hitSky = true;
+RayHit getSkyHit(RayHit hit) {
+  RayHit result = hit;
+
+  result.albedo = vec3(0, 0.3, 0.8);
+  result.hitSky = true;
+
+  return result;
 }

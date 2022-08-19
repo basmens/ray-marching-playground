@@ -6,7 +6,6 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
-import org.lwjgl.system.*;
 
 import nl.basmens.raymarchingplayground.engine.eventListeners.KeyEventListener;
 import nl.basmens.raymarchingplayground.engine.eventListeners.MouseEventListener;
@@ -15,10 +14,7 @@ import nl.basmens.raymarchingplayground.util.Time;
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
-
-import java.nio.DoubleBuffer;
 
 
 public class Window {
@@ -28,7 +24,6 @@ public class Window {
 
   private static Scene currentScene;
 
-  private long glfwMonitor;
   private long glfwWindow;
   private int width, height;
   private String title;
@@ -67,7 +62,7 @@ public class Window {
     //glfwWindowHint(GLFW_SAMPLES, 8);  // Enable anti-aliasing
 
     // Create window
-    glfwMonitor = glfwGetPrimaryMonitor();
+    long glfwMonitor = glfwGetPrimaryMonitor();
     GLFWVidMode videoMode = glfwGetVideoMode(glfwMonitor);
     this.width = videoMode.width();
     this.height = videoMode.height();
@@ -76,7 +71,7 @@ public class Window {
     this.height = 1080;
 
     glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
-    //glfwWindow = glfwCreateWindow(this.width, this.height, this.title, glfwGetPrimaryMonitor(), NULL);
+    //glfwWindow = glfwCreateWindow(this.width, this.height, this.title, glfwMonitor, NULL);
 		if (glfwWindow == NULL)
 			throw new RuntimeException("Failed to create the GLFW window");
 
@@ -101,7 +96,7 @@ public class Window {
     GL.createCapabilities();
 
     // Make scene
-    currentScene = new FractalScene();
+    currentScene = new Scene();
     currentScene.init();
   }
 

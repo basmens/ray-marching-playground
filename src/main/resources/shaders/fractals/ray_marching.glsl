@@ -25,35 +25,21 @@ uniform mat4 u_pointCameraMatrix;
 uniform mat3 u_vectorCameraMatrix;
 
 // Structures
-struct Material {
-  vec3 color;
-
-  float gloss;
-  float diffuse;
-  float albedo;
-
-  //float roughness;
-  float reflectiveness;
-};
-Material createMaterial() {
-  return Material(vec3(1), 0, 1, 1, 0);
-}
-
-
 struct RayHit {
   vec3 position;
   vec3 normal;
   vec3 direction;
-  Material material;
+
+  vec3 albedo;
 
   float distanceTraveled;
   int stepsTaken;
-  float finalDistance;
+  float lastDistance;
 
   bool hitSky;
 };
 RayHit createRayHit() {
-  return RayHit(vec3(0), vec3(0, 1, 0), vec3(0, 1, 0), createMaterial(), 0, 0, 0, true);
+  return RayHit(vec3(0), vec3(0, 1, 0), vec3(0, -1, 0), vec3(0), 0, 0, 0, true);
 }
 
 
@@ -74,7 +60,7 @@ const Light lights[1] = Light[1](
   // Light(vec3(-1, 0, 0), 1, vec3(1, 1, 1), 1, true, false),
   // Light(vec3(0, 0, 1), 1, vec3(1, 1, 1), 1, true, false),
   // Light(vec3(0, 0, -1), 1, vec3(1, 1, 1), 1, true, false)
-  Light(vec3(0, 0, 0), 1, vec3(1, 1, 1), 10000, false, false)
+  Light(vec3(0, 0, 0), 1, vec3(1, 1, 1), 10000, false, true)
 );
 
 
@@ -82,9 +68,7 @@ const Light lights[1] = Light[1](
 const float maxSteps = 1200;
 const float shadow_bias = 1e-4;
 
-const bool useReflections = false;
-const bool useLighting = true;
-const bool useAmbientLight = false;
+const bool useAmbientLight = true;
 const bool useLightSources = true;
 const bool useDarkenEffect = true;
 const bool useFog = false;
@@ -116,13 +100,14 @@ out vec4 fragColor;
 // ==================================================================================================================================================
 RayHit ray(vec3 position, vec3 direction) {
   RayHit hit = createRayHit();
-
-  Material hitMaterial;
+  
   vec3 normal;
+  vec3 albedo;
+
   float distanceToScene = ELIPSON + 1;
 
   for (int i = 0; i < maxSteps && distanceToScene > ELIPSON; i++) {
-    distanceToScene = getDistanceToScene(position, normal, hitMaterial);
+    distanceToScene = getDistanceToScene(position, normal, albedo);
     position += direction * distanceToScene;
 
     hit.distanceTraveled += distanceToScene;
@@ -132,13 +117,9 @@ RayHit ray(vec3 position, vec3 direction) {
   hit.position = position;
   hit.normal = normal;
   hit.direction = direction;
-  hit.material = hitMaterial;
-  hit.finalDistance = distanceToScene;
-  hit.hitSky = false;
-
-  if (distanceToScene > ELIPSON) {
-    getSkyHit(hit);
-  }
+  hit.albedo = albedo;
+  hit.lastDistance = distanceToScene;
+  hit.hitSky = distanceToScene > ELIPSON;
 
   return hit;
 }
@@ -150,25 +131,18 @@ RayHit ray(vec3 position, vec3 direction) {
 vec3 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
   RayHit hit = ray(rayOrigin, rayDirection);
 
-  vec3 color = hit.material.color;
-
-  // Reflection
-  if (useReflections) {
-    float reflectiveness = hit.material.reflectiveness;
-
-    vec3 reflectionColor = vec3(0);
-
-    color = reflectionColor * reflectiveness + color * (1 - reflectiveness);
-  }
+  vec3 color = vec3(0);
 
 
   // Lighting
-  if (useLighting && !hit.hitSky) {
-    vec3 lightColor = vec3(0);
+  if (hit.hitSky) {
+    hit = getSkyHit(hit);
+    color = hit.albedo;
+  } else {
 
     // Ambient light
     if (useAmbientLight) {
-      lightColor += ambientLightColor;
+      color += hit.albedo * ambientLightColor;
     }
 
     // Light sources
@@ -181,31 +155,26 @@ vec3 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
         float distanceToLight = distance(origin, target);
         vec3 lightDirection = normalize((light.isDistantLight) ? target : target - origin);
 
-        bool succes = (light.hasShadows) ? distance(origin, ray(origin, lightDirection).position) > distanceToLight : true;
+        bool succes = !light.hasShadows || ray(origin, lightDirection).distanceTraveled > distanceToLight;
 
         if (succes) {
-          Light light = lights[i];
-          float angleWithSurface = max(dot(hit.normal, lightDirection), 0);
-
-          vec3 diffuseColor = hit.material.albedo / PI * lights[i].intensity * lights[i].color * angleWithSurface;
+          vec3 diffuseColor = hit.albedo / PI * lights[i].intensity * lights[i].color * clamp(dot(hit.normal, lightDirection), 0, 1);
 
           if (light.isDistantLight) {
-            lightColor += diffuseColor;
+            color += diffuseColor;
           } else {
-            lightColor += diffuseColor / (4 * PI * distanceToLight * distanceToLight);
+            color += diffuseColor / (4 * PI * distanceToLight * distanceToLight);
           }
         }
       }
     }
-    //lightColor = vec3(abs(dot(-hit.direction, hit.normal)));
+    //color *= vec3(abs(dot(-hit.direction, hit.normal)));
 
     if (useDarkenEffect) {
-      float interpolate = (hit.finalDistance / ELIPSON - 1) / dot(-hit.direction, hit.normal) + 1;
+      float interpolate = (hit.lastDistance / ELIPSON - 1) / dot(-hit.direction, hit.normal) + 1;
       interpolate = sqrt(clamp(interpolate, 0, 1));
-      lightColor *= pow(darkenEffect, hit.stepsTaken + interpolate);
+      color *= pow(darkenEffect, hit.stepsTaken + interpolate);
     }
-    
-    color *= lightColor;
   }
 
 
