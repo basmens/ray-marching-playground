@@ -1,6 +1,5 @@
 package nl.basmens.raymarchingplayground.renderer;
 
-
 import static org.lwjgl.opengl.GL30.*;
 
 import java.nio.FloatBuffer;
@@ -8,35 +7,33 @@ import java.nio.IntBuffer;
 
 import org.lwjgl.BufferUtils;
 
-
 public class Renderer {
   protected Shader shader;
 
-  protected int vaoID, vboID, eboID;
-
+  protected int vaoID;
+  protected int vboID;
+  protected int eboID;
 
   private float[] vertexArray = {
-    1f, -1f, 0f,  // Bottom right  0
-   -1f,  1f, 0f,  // Top Left      1
-    1f,  1f, 0f,  // Top right     2
-   -1f, -1f, 0f   // Bottom Left   3
+      1F, -1F, 0F, // Bottom right 0
+      -1F, 1F, 0F, // Top Left 1
+      1F, 1F, 0F, // Top right 2
+      -1F, -1F, 0F // Bottom Left 3
   };
 
   // Must be counter-clockwise
   private int[] elementArray = {
-    1, 0, 2,  // Top right triangle
-    1, 3, 0   // Bottom left triangle
+      1, 0, 2, // Top right triangle
+      1, 3, 0 // Bottom left triangle
   };
-
 
   public Renderer(Shader shader) {
     this.shader = shader;
   }
 
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Generate VAO, VBO and EBO buffer objects and send them to the GPU
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   public void generateBufferObjects() {
     vaoID = glGenVertexArrays();
     glBindVertexArray(vaoID);
@@ -66,10 +63,9 @@ public class Renderer {
     glEnableVertexAttribArray(0);
   }
 
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Render
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   public void render() {
     shader.use();
 
@@ -83,8 +79,8 @@ public class Renderer {
 
     // Unbind everything
     glDisableVertexAttribArray(0);
-    glBindVertexArray(0); 
-   
+    glBindVertexArray(0);
+
     shader.detach();
   }
 }

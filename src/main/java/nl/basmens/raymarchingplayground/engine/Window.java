@@ -7,8 +7,8 @@ import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 
-import nl.basmens.raymarchingplayground.engine.eventListeners.KeyEventListener;
-import nl.basmens.raymarchingplayground.engine.eventListeners.MouseEventListener;
+import nl.basmens.raymarchingplayground.engine.event_listeners.KeyEventListener;
+import nl.basmens.raymarchingplayground.engine.event_listeners.MouseEventListener;
 import nl.basmens.raymarchingplayground.util.Time;
 
 import static org.lwjgl.glfw.Callbacks.*;
@@ -16,50 +16,46 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
+public final class Window {
+  private static Window window;
 
-public class Window {
-  private static Window window = null;
+  private static final Logger LOGGER = LogManager.getLogger(Window.class);
 
-  private static final Logger logger = LogManager.getLogger(Window.class);
-
-  private static Scene currentScene;
+  private Scene currentScene;
 
   private long glfwWindow;
-  private int width, height;
-  private String title;
+  private int width;
+  private int height;
+  private String title = "Ray Marching Playground";
 
   private int frameCount = -1;
 
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Constructor
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   private Window() {
-    logger.info("Window constructor");
+    LOGGER.info("Window constructor");
   }
 
   // Extra init function for singleton
   public void init() {
-    logger.info("Window init");
-    logger.info("Hello LWJGL " + Version.getVersion() + "!");
-
-    this.title = "Ray Marching Playground";
-
+    LOGGER.info("Window init");
+    LOGGER.info("Hello LWJGL " + Version.getVersion() + "!");
 
     // Setup error callback
-    GLFW.glfwSetErrorCallback(new ErrorCallback(logger));
+    GLFW.glfwSetErrorCallback(new ErrorCallback(LOGGER));
 
     // Initialize GLFW
     if (!glfwInit()) {
-			throw new IllegalStateException("Unable to initialize GLFW");
+      throw new IllegalStateException("Unable to initialize GLFW");
     }
 
-		// Configure GLFW
-		glfwDefaultWindowHints();
-		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-		//glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
-    //glfwWindowHint(GLFW_SAMPLES, 8);  // Enable anti-aliasing
+    // Configure GLFW
+    glfwDefaultWindowHints();
+    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    // glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+    // glfwWindowHint(GLFW_SAMPLES, 8); // Enable anti-aliasing
 
     // Create window
     long glfwMonitor = glfwGetPrimaryMonitor();
@@ -71,9 +67,11 @@ public class Window {
     this.height = 1080;
 
     glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
-    //glfwWindow = glfwCreateWindow(this.width, this.height, this.title, glfwMonitor, NULL);
-		if (glfwWindow == NULL)
-			throw new RuntimeException("Failed to create the GLFW window");
+    // glfwWindow = glfwCreateWindow(this.width, this.height, this.title,
+    // glfwMonitor, NULL);
+    if (glfwWindow == NULL) {
+      throw new RuntimeException("Failed to create the GLFW window");
+    }
 
     // Add event listeners
     glfwSetCursorPosCallback(glfwWindow, MouseEventListener::mousePosCallBack);
@@ -100,22 +98,20 @@ public class Window {
     currentScene.init();
   }
 
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Singleton get
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   public static Window get() {
     if (Window.window == null) {
       Window.window = new Window();
     }
-    
+
     return Window.window;
   }
 
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Loop
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   private void loop() {
     double beginTime = Time.getTime();
     double endTime;
@@ -126,23 +122,24 @@ public class Window {
     double lastFPScheck = beginTime;
     int framesPerFPScheck = 1;
 
-    while(!glfwWindowShouldClose(glfwWindow)) {
+    while (!glfwWindowShouldClose(glfwWindow)) {
       // Poll events
       glfwPollEvents();
 
       // float r = (float)Math.sin(time.getTime() + Math.PI / 3 * 0);
       // float g = (float)Math.sin(time.getTime() + Math.PI / 3 * 2);
       // float b = (float)Math.sin(time.getTime() + Math.PI / 3 * 4);
-      float r = 1.5f - (float)Math.abs((Time.getTime() + 0) % 3 - 1.5);
-      float g = 1.5f - (float)Math.abs((Time.getTime() + 1) % 3 - 1.5);
-      float b = 1.5f - (float)Math.abs((Time.getTime() + 2) % 3 - 1.5);
+      float r = (float) (1.5F - Math.abs((Time.getTime() + 0) % 3 - 1.5));
+      float g = (float) (1.5F - Math.abs((Time.getTime() + 1) % 3 - 1.5));
+      float b = (float) (1.5F - Math.abs((Time.getTime() + 2) % 3 - 1.5));
 
       glClearColor(r, g, b, 1);
       glClear(GL_COLOR_BUFFER_BIT);
 
-      if (deltaTime >= 0)
+      if (deltaTime >= 0) {
         currentScene.update(deltaTime);
-      
+      }
+
       glfwSwapBuffers(glfwWindow);
 
       endTime = Time.getTime();
@@ -151,7 +148,7 @@ public class Window {
       frameCount++;
 
       if (frameCount % framesPerFPScheck == 0) {
-        System.out.println("FPS over " + framesPerFPScheck + " frames: " + framesPerFPScheck/(endTime - lastFPScheck));
+        LOGGER.info("FPS over " + framesPerFPScheck + " frames: " + framesPerFPScheck / (endTime - lastFPScheck));
         lastFPScheck = endTime;
       }
 
@@ -159,10 +156,9 @@ public class Window {
     }
   }
 
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Terminate
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   private void terminate() {
     glfwFreeCallbacks(glfwWindow);
     glfwDestroyWindow(glfwWindow);
@@ -171,40 +167,34 @@ public class Window {
     glfwSetErrorCallback(null).free();
   }
 
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Run
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   public void run() {
     loop();
     terminate();
   }
 
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Getters and Setters
-  // ==================================================================================================================================================
+  // ===================================================================================================================
 
   // Get only
   public int getFrameCount() {
     return frameCount;
   }
 
-
   public int getWidth() {
     return width;
   }
-
 
   public void setWidth(int width) {
     this.width = width;
   }
 
-
   public int getHeight() {
     return height;
   }
-
 
   public void setHeight(int height) {
     this.height = height;

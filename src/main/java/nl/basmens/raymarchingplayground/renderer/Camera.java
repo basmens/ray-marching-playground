@@ -1,12 +1,14 @@
 package nl.basmens.raymarchingplayground.renderer;
 
-
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-
 public class Camera {
+  private static final Vector3f axisX = new Vector3f(1, 0, 0);
+  private static final Vector3f axisY = new Vector3f(0, 1, 0);
+  private static final Vector3f axisZ = new Vector3f(0, 0, 1);
+
   private Vector3f position;
   private Vector3f direction;
   private float fov;
@@ -14,14 +16,9 @@ public class Camera {
   private Matrix4f pointCameraMatrix;
   private Matrix3f vectorCameraMatrix;
 
-  private static final Vector3f axisX = new Vector3f(1, 0, 0);
-  private static final Vector3f axisY = new Vector3f(0, 1, 0);
-  private static final Vector3f axisZ = new Vector3f(0, 0, 1);
-
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Constructors
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   public Camera(float fov) {
     this(new Vector3f(0), new Vector3f(0), fov);
   }
@@ -35,10 +32,9 @@ public class Camera {
     vectorCameraMatrix = Camera.generateVectorMatrix(position, direction);
   }
 
-  
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Generate matrices
-  // ==================================================================================================================================================
+  // ===================================================================================================================
 
   // First rotate around z-axis (tilting head like a cute dog)
   // Then rotate around x-axis (looking up and down)
@@ -46,17 +42,17 @@ public class Camera {
   // Extra for points, translate
 
   public static Matrix4f generatePointMatrix(Vector3f position, Vector3f direction) {
-    return new Matrix4f().translate(position).rotate(direction.y, axisY).rotate(direction.x, axisX).rotate(direction.z, axisZ);
+    return new Matrix4f().translate(position).rotate(direction.y, axisY).rotate(direction.x, axisX).rotate(direction.z,
+        axisZ);
   }
 
   public static Matrix3f generateVectorMatrix(Vector3f position, Vector3f direction) {
     return new Matrix3f().rotate(direction.y, axisY).rotate(direction.x, axisX).rotate(direction.z, axisZ);
   }
 
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Upload data to shader
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   public void uploadDataToShader(Shader shader) {
     shader.uploadVec3f("u_cameraPosition", position);
     shader.uploadVec3f("u_cameraDirection", direction);
@@ -66,14 +62,12 @@ public class Camera {
     shader.uploadMat3f("u_vectorCameraMatrix", vectorCameraMatrix);
   }
 
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Getters and Setters
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   public Vector3f getPosition() {
     return new Vector3f(position);
   }
-
 
   public void setPosition(Vector3f position) {
     this.position = new Vector3f(position);
@@ -82,11 +76,9 @@ public class Camera {
     vectorCameraMatrix = Camera.generateVectorMatrix(position, direction);
   }
 
-
   public Vector3f getDirection() {
     return new Vector3f(direction);
   }
-
 
   public void setDirection(Vector3f direction) {
     this.direction = new Vector3f(direction);
@@ -95,16 +87,13 @@ public class Camera {
     vectorCameraMatrix = Camera.generateVectorMatrix(position, direction);
   }
 
-
   public float getFov() {
     return fov;
   }
 
-
   public void setFov(float fov) {
     this.fov = fov;
   }
-
 
   // Get only
   public Matrix4f getPointCameraMatrix() {

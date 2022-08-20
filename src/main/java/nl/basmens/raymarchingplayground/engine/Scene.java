@@ -1,13 +1,12 @@
 package nl.basmens.raymarchingplayground.engine;
 
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
-import nl.basmens.raymarchingplayground.engine.eventListeners.KeyEventListener;
-import nl.basmens.raymarchingplayground.engine.eventListeners.MouseEventListener;
+import nl.basmens.raymarchingplayground.engine.event_listeners.KeyEventListener;
+import nl.basmens.raymarchingplayground.engine.event_listeners.MouseEventListener;
 import nl.basmens.raymarchingplayground.renderer.Camera;
 import nl.basmens.raymarchingplayground.renderer.Renderer;
 import nl.basmens.raymarchingplayground.renderer.Shader;
@@ -22,49 +21,55 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 public class Scene {
-  private static final Logger logger = LogManager.getLogger(Scene.class);
+  private static final Logger LOGGER = LogManager.getLogger(Scene.class);
 
-  Renderer renderer;
-  Shader shader;
-  Camera camera;
+  private Renderer renderer;
+  private Shader shader;
+  private Camera camera;
 
-  private double cameraPosX, cameraPosY, cameraPosZ;
-  private double cameraDirX, cameraDirY, cameraDirZ;
+  private double cameraPosX;
+  private double cameraPosY;
+  private double cameraPosZ;
+  private double cameraDirX;
+  private double cameraDirY;
+  private double cameraDirZ;
   private double cameraSpeed = 10;
   private double cameraSensitivity = 0.002;
-
 
   // Fractals
   private String shaderFilePath = "src/main/resources/shaders/fractals/ray_marching.glsl";
   private String sceneFilePath = "src/main/resources/shaders/fractals/menger_sponge.glsl";
 
   // Old
-  //private String shaderFilePath = "src/main/resources/shaders/old/ray_marching_old.glsl";
-  //private String sceneFilePath = "src/main/resources/shaders/old/old_scene.glsl";
+  // private String shaderFilePath =
+  // "src/main/resources/shaders/old/ray_marching_old.glsl";
+  // private String sceneFilePath =
+  // "src/main/resources/shaders/old/old_scene.glsl";
 
   // Over_engineered
-  // private String shaderFilePath = "src/main/resources/shaders/over_engineered/ray_marching_over_engineered.glsl";
-  // private String sceneFilePath = "src/main/resources/shaders/over_engineered/spheres.glsl";
-  // private String sceneFilePath = "src/main/resources/shaders/over_engineered/test_scene.glsl";
+  // private String shaderFilePath =
+  // "src/main/resources/shaders/over_engineered/ray_marching_over_engineered.glsl";
+  // private String sceneFilePath =
+  // "src/main/resources/shaders/over_engineered/spheres.glsl";
+  // private String sceneFilePath =
+  // "src/main/resources/shaders/over_engineered/test_scene.glsl";
 
   // Shadertoy
-  // private String shaderFilePath = "src/main/resources/shaders/shadertoy/shadertoy_wrapper.glsl";
-  // private String sceneFilePath = "src/main/resources/shaders/shadertoy/shadertoy_scene.glsl";
-  
+  // private String shaderFilePath =
+  // "src/main/resources/shaders/shadertoy/shadertoy_wrapper.glsl";
+  // private String sceneFilePath =
+  // "src/main/resources/shaders/shadertoy/shadertoy_scene.glsl";
 
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Initialization
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   public Scene() {
     super();
   }
 
-
   public void init() {
-    logger.info("FractalScene init");
+    LOGGER.info("FractalScene init");
 
     shader = new Shader(shaderFilePath);
     String source = shader.getFragmentSource();
@@ -72,29 +77,34 @@ public class Scene {
     Pattern p = Pattern.compile("(<scene code here>)", Pattern.CASE_INSENSITIVE);
     Matcher m = p.matcher(source);
     int splitIndex = 0;
-    if(m.find()) {
+    if (m.find()) {
       splitIndex = source.indexOf("\n", m.end());
     } else {
-      logger.error("No place to put the scene code. Add '<scene code here>' somewhere to insert the scene code");
+      LOGGER.error("No place to put the scene code. Add '<scene code here>' somewhere to insert the scene code");
     }
 
     // Pattern p = Pattern.compile("(#)([a-z]+)( )");
     // Matcher m = p.matcher(source);
     // int splitIndex = 0;
     // while(m.find(splitIndex)) {
-    //   splitIndex = m.end();
+    // splitIndex = m.end();
     // }
     // splitIndex = source.indexOf("\n", splitIndex);
 
     // Generate shader and renderer
-    shader.setFragmentSource(source.substring(0, splitIndex) + Shader.readFragmentShaderFile(sceneFilePath) + "\n" + source.substring(splitIndex));
+    shader.setFragmentSource(
+        source.substring(0, splitIndex) +
+            Shader.readFragmentShaderFile(sceneFilePath) +
+            "\n" +
+            source.substring(splitIndex));
+
     shader.compile();
 
     renderer = new Renderer(shader);
     renderer.generateBufferObjects();
 
     // Generate camera
-    camera = new Camera((float)(Math.PI / 4));
+    camera = new Camera((float) (Math.PI / 4));
 
     cameraPosX = 0;
     cameraPosY = 0;
@@ -111,26 +121,17 @@ public class Scene {
     shader.uploadVec2i("u_resolution", new Vector2i(Window.get().getWidth(), Window.get().getHeight()));
   }
 
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Update
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   public void update(double dt) {
     double t = Math.pow(Time.getTime() * 20 + 4, 0.6) - 2;
-    // double cameraDist = 30 / (t * 0.1 + 2) + 5;
 
-    // double angle = t * 0.05 - 0.5;
-    // //double angle = -0f;
-    // camera.setPosition(new Vector3f((float)(Math.sin(angle) * cameraDist), (float)(Math.sin(angle * 0.4) * 4), (float)(Math.cos(angle) * cameraDist)));
-    // camera.setDirection(new Vector3f((float)(Math.sin(angle * 0.4) * 0.4), (float)(angle - Math.PI / 4), (float)(angle * 0.03)));
-    // camera.uploadDataToShader(shader);
-    
     updateMovement(dt);
 
-    shader.uploadVec1f("u_time", (float)t);
+    shader.uploadVec1f("u_time", (float) t);
     renderer.render();
   }
-
 
   private void updateMovement(double dt) {
     cameraSpeed *= Math.pow(1.2, MouseEventListener.getScrollY());
@@ -164,13 +165,12 @@ public class Scene {
     setCamera();
   }
 
-
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   // Set camera
-  // ==================================================================================================================================================
+  // ===================================================================================================================
   private void setCamera() {
-    camera.setPosition(new Vector3f((float)cameraPosX, (float)cameraPosY, (float)cameraPosZ));
-    camera.setDirection(new Vector3f((float)cameraDirX, (float)cameraDirY, (float)cameraDirZ));
+    camera.setPosition(new Vector3f((float) cameraPosX, (float) cameraPosY, (float) cameraPosZ));
+    camera.setDirection(new Vector3f((float) cameraDirX, (float) cameraDirY, (float) cameraDirZ));
     camera.uploadDataToShader(shader);
   }
 }

@@ -4,13 +4,11 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFWErrorCallbackI;
 
 public class ErrorCallback implements GLFWErrorCallbackI {
-  Logger logger;
-
+  private Logger logger;
 
   public ErrorCallback(Logger logger) {
     this.logger = logger;
   }
-
 
   @Override
   public void invoke(int error, long description) {
