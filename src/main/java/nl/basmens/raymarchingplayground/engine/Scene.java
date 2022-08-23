@@ -37,9 +37,13 @@ public class Scene {
   private double cameraSpeed = 10;
   private double cameraSensitivity = 0.002;
 
+  // Ray tracers
+  private String shaderFilePath = "src/main/resources/shaders/ray_tracers/ray_tracer.glsl";
+  private String sceneFilePath = "src/main/resources/shaders/ray_tracers/scene.glsl";
+  
   // Fractals
-  private String shaderFilePath = "src/main/resources/shaders/fractals/ray_marching.glsl";
-  private String sceneFilePath = "src/main/resources/shaders/fractals/menger_sponge.glsl";
+  //private String shaderFilePath = "src/main/resources/shaders/fractals/ray_marching.glsl";
+  //private String sceneFilePath = "src/main/resources/shaders/fractals/menger_sponge.glsl";
 
   // Old
   // private String shaderFilePath =
@@ -108,7 +112,7 @@ public class Scene {
 
     cameraPosX = 0;
     cameraPosY = 0;
-    cameraPosZ = 35;
+    cameraPosZ = 5;
 
     cameraDirX = 0;
     cameraDirY = 0;
