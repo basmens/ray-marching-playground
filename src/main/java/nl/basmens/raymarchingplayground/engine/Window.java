@@ -80,7 +80,7 @@ public final class Window {
     glfwSetKeyCallback(glfwWindow, KeyEventListener::keyCallBack);
 
     // Set input Mode
-    glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Make the OpenGL context current
     glfwMakeContextCurrent(glfwWindow);
@@ -120,7 +120,7 @@ public final class Window {
     frameCount = 0;
 
     double lastFPScheck = beginTime;
-    int framesPerFPScheck = 1;
+    int framesPerFPScheck = 30;
 
     while (!glfwWindowShouldClose(glfwWindow)) {
       // Poll events
