@@ -61,7 +61,7 @@ struct Light {
 const float maxDist = 1200;
 const float shadow_bias = 1e-1;
 
-const vec3 skyColor = vec3(0, 0, 0);
+const vec3 skyColor = vec3(0, 0.3, 0.8);
 
 // Constants
 const float PI = 3.141592653589793;
@@ -72,31 +72,36 @@ const float EPSILON = 1e-4;
 out vec4 fragColor;
 
 // Scene
+Triangle[3] triangles = Triangle[3](
+  Triangle(
+    vec3(0, 0, 0), vec3(0, 0, 3), vec3(3, 0, 0),
+    vec2(0, 0), vec2(0, 1), vec2(1, 0),
+    vec3(0), vec3(1, 0, 1)),
+  Triangle(
+    vec3(3, 0, 0), vec3(0, 0, 3), vec3(3, -1, 3),
+    vec2(1, 0), vec2(0, 1), vec2(1, 1),
+    vec3(0), vec3(1, 0, 1)),
+  Triangle(
+    vec3(0, 0, 0), vec3(3, 0, 0), vec3(0, 3, -1),
+    vec2(0, 0), vec2(1, 0), vec2(0, 1),
+    vec3(0), vec3(1, 0, 1))
+);
 // Triangle[1] triangles = Triangle[1](
 //   Triangle(
-//     vec3(0, 0, 0), vec3(0, 0, 3), vec3(3, 0, 0),
-//     vec2(0, 0), vec2(0, 1), vec2(1, 0),
-//     vec3(0), vec3(1, 0, 1))
+//     vec3(-1, -1, -5), vec3(1, -1, -5), vec3(0, 1, -5),
+//     vec2(0, 0), vec2(1, 0), vec2(0.5, 1),
+//     vec3(0), vec3(1))
 // );
-Triangle[1] triangles = Triangle[1](
-  Triangle(
-    vec3(-1, -1, -5), vec3(1, -1, -5), vec3(0, 1, -5),
-    vec2(0, 0), vec2(1, 0), vec2(0.5, 1),
-    vec3(0), vec3(1))
-);
 
 const Light lights[1] = Light[1](
-  Light(vec3(0, 3, 0), 1, vec3(1, 1, 1), 90, false)
+  Light(vec3(0, 5, 0), 1, vec3(1, 1, 1), 130, false)
 );
 
 // ==================================================================================================================================================
 // Texture
 // ==================================================================================================================================================
 vec3 getTexture(vec3 color, vec2 texCoord) {
-  color *= ((mod(texCoord.x * 10, 2) < 1 ^^ mod(texCoord.y * 10, 2) < 1) ? 0.5 : 1);
-
-  float dist = length(texCoord) / sqrt(2);
-  return color * dist * dist;
+  return color * ((mod(texCoord.x * 10, 2) < 1 ^^ mod(texCoord.y * 10, 2) < 1) ? 0.5 : 1);
 }
 
 
@@ -175,26 +180,29 @@ bool intersect(in Triangle object, in vec3 origin, in vec3 direction, out float 
 bool ray(in vec3 origin, in vec3 direction, in float tNear, out RayHit hit) {
   Triangle objectHit;
   bool hasHit = false;
-  float u, v;
+  float uNear, vNear;
+  float t, u, v;
 
   for(int i = 0; i < triangles.length; i++) {
-    float t;
-
     if(intersect(triangles[i], origin, direction, t, u, v) && t < tNear) {
       objectHit = triangles[i];
+
       tNear = t;
+      uNear = u;
+      vNear = v;
+
       hasHit = true;
     }
   }
 
-  vec2 texCoord = objectHit.texC0 * u + objectHit.texC1 * v + objectHit.texC2 * (1 - u - v);
+  vec2 texCoord = objectHit.texC0 * uNear + objectHit.texC1 * vNear + objectHit.texC2 * (1 - uNear - vNear);
 
   hit = createRayHit();
   hit.position = origin + tNear * direction;
   hit.normal = objectHit.normal;
   hit.direction = direction;
-  //hit.albedo = getTexture(objectHit.albedo, texCoord);
-  hit.albedo = vec3(u, v, 1 - u - v);
+  hit.albedo = getTexture(objectHit.albedo, texCoord);
+  //hit.albedo = vec3(uNear, vNear, 1 - uNear - vNear);
   hit.dist = tNear;
 
   return hasHit;
@@ -262,8 +270,6 @@ void main() {
       }
     }
     //color = albedo * abs(dot(-hit.direction, hit.normal));
-
-    color = albedo;
   }
 
   fragColor = vec4(color, 1);

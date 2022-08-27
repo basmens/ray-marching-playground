@@ -111,7 +111,7 @@ public class Scene {
 
     cameraPosX = 0;
     cameraPosY = 0;
-    cameraPosZ = 0;
+    cameraPosZ = 5;
 
     cameraDirX = 0;
     cameraDirY = 0;
@@ -130,7 +130,7 @@ public class Scene {
   public void update(double dt) {
     double t = Math.pow(Time.getTime() * 20 + 4, 0.6) - 2;
 
-    //updateMovement(dt);
+    updateMovement(dt);
 
     shader.uploadVec1f("u_time", (float) t);
     renderer.render();
