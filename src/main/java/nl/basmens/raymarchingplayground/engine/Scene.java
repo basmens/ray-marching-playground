@@ -39,7 +39,8 @@ public class Scene {
 
   // Ray tracers
   //private String shaderFilePath = "src/main/resources/shaders/ray_tracers/ray_tracer_speres.glsl";
-  private String shaderFilePath = "src/main/resources/shaders/ray_tracers/ray_tracer_triangles.glsl";
+  //private String shaderFilePath = "src/main/resources/shaders/ray_tracers/ray_tracer_triangles.glsl";
+  private String shaderFilePath = "src/main/resources/shaders/ray_tracers/ray_tracer_meshes.glsl";
   private String sceneFilePath = "src/main/resources/shaders/ray_tracers/scene.glsl";
   
   // Fractals
