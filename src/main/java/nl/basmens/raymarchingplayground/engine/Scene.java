@@ -14,9 +14,9 @@ import nl.basmens.raymarchingplayground.util.Time;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_V;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -162,7 +162,7 @@ public class Scene {
     if (KeyEventListener.isKeyPressed(GLFW_KEY_SPACE)) {
       cameraPosY += cameraSpeed * dt;
     }
-    if (KeyEventListener.isKeyPressed(GLFW_KEY_V)) {
+    if (KeyEventListener.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
       cameraPosY -= cameraSpeed * dt;
     }
 

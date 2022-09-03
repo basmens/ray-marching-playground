@@ -67,8 +67,7 @@ public final class Window {
     this.height = 1080;
 
     glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
-    // glfwWindow = glfwCreateWindow(this.width, this.height, this.title,
-    // glfwMonitor, NULL);
+    //glfwWindow = glfwCreateWindow(this.width, this.height, this.title, glfwMonitor, NULL);
     if (glfwWindow == NULL) {
       throw new RuntimeException("Failed to create the GLFW window");
     }

@@ -132,6 +132,11 @@ bool intersectSphere(in vec3 origin, in vec3 direction, in vec3 center, in float
 
   vec3 l = center - origin;
 
+  if(dot(l, l) < radius2) {
+    t = -1;
+    return true;
+  }
+
   float tca = dot(l, direction);
   if(tca < 0)
     return false;
@@ -183,7 +188,7 @@ bool intersectTriangle(in vec3 origin, in vec3 direction, in vec3 v0, in vec3 v1
 
   t = dot(v2v1, qvec) * invDet;
 
-  return true;
+  return t >= 0;
 }
 
 // ==================================================================================================================================================
