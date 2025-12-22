@@ -4,8 +4,6 @@ import static org.lwjgl.opengl.GL30.*;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +24,7 @@ public class Shader {
 
   private static int programInUse;
 
-  private String filePath;
+  private String shaderResourcePath;
 
   private String vertexSource;
   private String fragmentSource;
@@ -38,21 +36,21 @@ public class Shader {
   // ===================================================================================================================
   // Initialization
   // ===================================================================================================================
-  public Shader(String filePath) {
+  public Shader(String shaderResourcePath) {
     LOGGER.info("Shader constructor");
 
-    this.filePath = filePath;
+    this.shaderResourcePath = shaderResourcePath;
 
-    vertexSource = Shader.readVertexShaderFile(filePath);
-    fragmentSource = Shader.readFragmentShaderFile(filePath);
+    vertexSource = Shader.readVertexShaderFile(shaderResourcePath);
+    fragmentSource = Shader.readFragmentShaderFile(shaderResourcePath);
   }
 
   // ===================================================================================================================
   // Read source file
   // ===================================================================================================================
-  public static String readVertexShaderFile(String filePath) {
+  public static String readVertexShaderFile(String shaderResourcePath) {
     try {
-      String source = new String(Files.readAllBytes(Paths.get(filePath)));
+      String source = new String(Shader.class.getClassLoader().getResourceAsStream(shaderResourcePath).readAllBytes());
 
       Pattern p = Pattern.compile("(#type)( )(vertex)", Pattern.CASE_INSENSITIVE);
       Matcher m = p.matcher(source);
@@ -70,7 +68,7 @@ public class Shader {
       }
 
     } catch (IOException e) {
-      LOGGER.error("Failed to load file '" + filePath + "'", e);
+      LOGGER.error("Failed to load file '" + shaderResourcePath + "'", e);
       assert false : "";
       return null;
     }
@@ -78,9 +76,9 @@ public class Shader {
     return "";
   }
 
-  public static String readFragmentShaderFile(String filePath) {
+  public static String readFragmentShaderFile(String shaderResourcePath) {
     try {
-      String source = new String(Files.readAllBytes(Paths.get(filePath)));
+      String source = new String(Shader.class.getClassLoader().getResourceAsStream(shaderResourcePath).readAllBytes());
 
       Pattern p = Pattern.compile("(#type)( )(fragment)", Pattern.CASE_INSENSITIVE);
       Matcher m = p.matcher(source);
@@ -101,7 +99,7 @@ public class Shader {
       }
 
     } catch (IOException e) {
-      LOGGER.error("Failed to load file '" + filePath + "'", e);
+      LOGGER.error("Failed to load file '" + shaderResourcePath + "'", e);
       assert false : "";
       return null;
     }
@@ -140,7 +138,7 @@ public class Shader {
     int succes = glGetShaderi(vertexShaderID, GL_COMPILE_STATUS);
     if (succes == GL_FALSE) {
       int len = glGetShaderi(vertexShaderID, GL_INFO_LOG_LENGTH);
-      LOGGER.error("'" + filePath + "' vertex shader failed to compile:\n\t" + glGetShaderInfoLog(vertexShaderID, len));
+      LOGGER.error("'" + shaderResourcePath + "' vertex shader failed to compile:\n\t" + glGetShaderInfoLog(vertexShaderID, len));
       assert false : "";
     }
 
@@ -153,7 +151,7 @@ public class Shader {
     if (succes == GL_FALSE) {
       int len = glGetShaderi(fragmentShaderID, GL_INFO_LOG_LENGTH);
       LOGGER.error(
-          "'" + filePath + "' fragment shader failed to compile:\n\t" + glGetShaderInfoLog(fragmentShaderID, len));
+          "'" + shaderResourcePath + "' fragment shader failed to compile:\n\t" + glGetShaderInfoLog(fragmentShaderID, len));
       assert false : "";
     }
 
@@ -166,7 +164,7 @@ public class Shader {
     succes = glGetProgrami(shaderProgramID, GL_LINK_STATUS);
     if (succes == GL_FALSE) {
       int len = glGetProgrami(shaderProgramID, GL_INFO_LOG_LENGTH);
-      LOGGER.error("'" + filePath + "' shader failed to link:\n\t" + glGetProgramInfoLog(shaderProgramID, len));
+      LOGGER.error("'" + shaderResourcePath + "' shader failed to link:\n\t" + glGetProgramInfoLog(shaderProgramID, len));
       assert false : "";
     }
   }

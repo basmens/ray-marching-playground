@@ -18,7 +18,7 @@ float getDistanceToScene(in vec3 rayPos, out vec3 normal, out Material materialH
 
 
 void getSkyHit(inout RayHit hit) {
-  Material material = createMaterial();
+  Material material = Material(vec3(0, 0, 1), 0, 0, 0, 0);
   material.color = vec3(0, 0, 1);
   hit.material = material;
   hit.hitSky = true;

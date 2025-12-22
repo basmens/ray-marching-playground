@@ -1,4 +1,6 @@
 #type fragment
+const int MENGER_SPONGE_ITERATIONS = 9;
+
 mat3 generateReflectionMatrix(vec3 n) {
   return mat3(
       1 - 2 * n.x * n.x,    -2 * n.x * n.y,    -2 * n.x * n.z,
@@ -42,7 +44,7 @@ float getDistanceToScene(in vec3 rayPos, out vec3 normal, out vec3 albedo) {
   // Approximate distance as a cube, no transformations
   if(length(point) < 5) {
     // All operations have to be done in reverse order
-    for(int i = 0; i < 9; i++) { 
+    for(int i = 0; i < MENGER_SPONGE_ITERATIONS; i++) { 
       point = applyScale(point, vec3(-1), vec3(3));
       scale *= 3;
 

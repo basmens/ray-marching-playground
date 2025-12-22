@@ -38,32 +38,27 @@ public class Scene {
   private double cameraSensitivity = 0.002;
 
   // Ray tracers
-  //private String shaderFilePath = "src/main/resources/shaders/ray_tracers/ray_tracer_speres.glsl";
-  //private String shaderFilePath = "src/main/resources/shaders/ray_tracers/ray_tracer_triangles.glsl";
-  private String shaderFilePath = "src/main/resources/shaders/ray_tracers/ray_tracer_meshes.glsl";
-  private String sceneFilePath = "src/main/resources/shaders/ray_tracers/scene.glsl";
+  // private String shaderFilePath = "shaders/ray_tracers/ray_tracer_spheres.glsl";
+  // private String shaderFilePath = "shaders/ray_tracers/ray_tracer_triangles.glsl";
+  // private String shaderFilePath = "shaders/ray_tracers/ray_tracer_meshes.glsl";
+  // private String sceneFilePath = "shaders/ray_tracers/scene.glsl";
   
   // Fractals
-  // private String shaderFilePath = "src/main/resources/shaders/fractals/ray_marching.glsl";
-  // private String sceneFilePath = "src/main/resources/shaders/fractals/menger_sponge.glsl";
+  private String shaderFilePath = "shaders/fractals/ray_marching.glsl";
+  private String sceneFilePath = "shaders/fractals/menger_sponge.glsl";
 
   // Old
-  // private String shaderFilePath =
-  // "src/main/resources/shaders/old/ray_marching_old.glsl";
-  // private String sceneFilePath =
-  // "src/main/resources/shaders/old/old_scene.glsl";
+  // private String shaderFilePath = "shaders/old/ray_marching_old.glsl";
+  // private String sceneFilePath = "shaders/old/old_scene.glsl";
 
   // Over_engineered
-  // private String shaderFilePath =
-  // "src/main/resources/shaders/over_engineered/ray_marching_over_engineered.glsl";
-  // private String sceneFilePath =
-  // "src/main/resources/shaders/over_engineered/spheres.glsl";
-  // private String sceneFilePath =
-  // "src/main/resources/shaders/over_engineered/test_scene.glsl";
+  // private String shaderFilePath = "shaders/over_engineered/ray_marching_over_engineered.glsl";
+  // private String sceneFilePath = "shaders/over_engineered/spheres.glsl";
+  // private String sceneFilePath = "shaders/over_engineered/test_scene.glsl";
 
   // Shadertoy
-  // private String shaderFilePath = "src/main/resources/shaders/shadertoy/shadertoy_wrapper.glsl";
-  // private String sceneFilePath = "src/main/resources/shaders/shadertoy/shadertoy_scene.glsl";
+  // private String shaderFilePath = "shaders/shadertoy/shadertoy_wrapper.glsl";
+  // private String sceneFilePath = "shaders/shadertoy/shadertoy_scene.glsl";
 
   // ===================================================================================================================
   // Initialization
